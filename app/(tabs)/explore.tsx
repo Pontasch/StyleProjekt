@@ -1,112 +1,165 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+type Contact = {
+  label: string;
+  link: string;
+};
+
+type CardProps = {
+  avatar: string;
+  name: string;
+  role: string;
+  company: string;
+  contacts: Contact[];
+};
+
+function Card(props: CardProps) {
+  
+  const { width } = useWindowDimensions();
+  const isWide: boolean = width >= 500;
+  const contacts = props.contacts;
+  return (
+    <View style={[
+      isWide ? styles.cardWide : styles.cardNarrow,
+      Platform.OS === "ios" ? styles.cardShadowIOS : styles.cardShadowAndroid
+    ]}>
+      <View style={styles.main}>
+        <Image style={styles.avatar} source={{ uri: props.avatar }} />
+        <View style={styles.info}>
+          <Text style={styles.name}>{props.name}</Text>
+          <Text style={styles.role}>{props.role}</Text>
+          <Text style={styles.company}>{props.company}</Text>
+        </View>
+      </View>
+      <View style={styles.chipContainer}>
+        {contacts.map((contact, idx) => (
+          <TouchableOpacity key={idx} style={styles.chip}>
+            <Text onPress={()=>Linking.openURL(contact.link)} style={styles.chipText}>{contact.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export default function TabTwoScreen() {
+
+
+  const cardProps: CardProps = {
+    avatar: "https://randomuser.me/api/portraits/men/40.jpg",
+    name: "Alex Smith",
+    role: "React Native Developer",
+    company: "Tech Innovators Ltd.",
+    contacts: [
+      { label: "Phone", link: "tel:+1234567890" },
+      { label: "Email", link: "mailto:test"},
+      { label: "Website", link: "https://example.com" },
+    ]
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <SafeAreaView>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Card 
+          avatar={cardProps.avatar}
+          name={cardProps.name}
+          role={cardProps.role}
+          company={cardProps.company}
+          contacts={cardProps.contacts}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 18,
   },
-  titleContainer: {
+  cardWide: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 22,
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
+    marginVertical: 22,
+  },
+  cardNarrow: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 22,
+    maxWidth: 420,
+    width: '100%',
+    alignSelf: 'center',
+    marginVertical: 22,
+  },
+  cardShadowIOS: {
+    shadowColor: '#222',
+    shadowOpacity: 0.13,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 10,
+  },
+  cardShadowAndroid: {
+    elevation: 7,
+  },
+  main: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginBottom: 14,
+    width: '100%',
+  },
+  avatar: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    backgroundColor: '#eee',
+    marginBottom: 10,
+  },
+  info: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  role: {
+    fontSize: 17,
+    color: '#555',
+    marginBottom: 2,
+  },
+  company: {
+    fontSize: 15,
+    color: '#1e90ff',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  chipContainer: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 12,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  chip: {
+    minWidth: 100,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#e3e7f1',
+    borderRadius: 19,
+    margin: 4,
+    alignItems: 'center',
+  },
+  chipText: {
+    color: '#1e90ff',
+    fontWeight: '500',
   },
 });
